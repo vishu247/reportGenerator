@@ -18,19 +18,7 @@ RUN pip3 install requests boto3 load_dotenv pyyaml jinja2
 
 
 # Install GitHub CLI based on architecture
-RUN if [ "$(uname -m)" = "x86_64" ]; then \
-        wget https://github.com/cli/cli/releases/download/v2.45.0/gh_2.45.0_linux_amd64.deb && \
-        dpkg -i gh_2.45.0_linux_amd64.deb; \
-        export ARCH_VALUE="amd64"; \
-    elif [ "$(uname -m)" = "AArch64" ]; then \
-        wget https://github.com/cli/cli/releases/download/v2.45.0/gh_2.45.0_linux_arm64.deb && \
-        dpkg -i gh_2.45.0_linux_arm64.deb; \
-        export ARCH_VALUE="arm64"; \
-    else \
-        echo "Unsupported architecture"; \
-        exit 1; \
-    fi
-
+   RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && echo $arch &&  wget  https://github.com/cli/cli/releases/download/v2.45.0/gh_2.45.0_linux_${arch}.deb && \
+        dpkg -i gh_2.45.0_linux_${arch}.deb;
 
 CMD ["python3","script.py"]
-
