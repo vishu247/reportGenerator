@@ -97,6 +97,8 @@ final_effort = {
     }
 }
 
+assigneeReport={}
+
 # Define the YAML content as a string
 mail_content = f"""
 mail:
@@ -197,10 +199,38 @@ def create_iteration_data(project_data, current_iterationID_title):
                 task_data.update({"Original_Effort": item.get('estimate')})
                 task_data.update({"Final_Effort": item.get('final Efforts')})
 
-                if item.get('status') in ["Done", "Under Review"]:      
+
+                if item.get('assignees'):
+                    assignee_key = item.get('assignees')
+                    print(assignee_key)
+                    for assignee_data in assignee_key:
+                        if assignee_data not in assigneeReport:
+                            assigneeReport[assignee_data] = {
+                                'completedTicket': 0,
+                                'CompletedEstimatedEffort': 0,
+                                'CompletedFinalEffort': 0,
+                                'CompletedEstimatedFinaldrift': 0.0,
+                                'IncompleteEstimatedEffort': 0, 
+                                'IncompleteTickets': 0
+                            }
+                        if item.get('status') in ["Done", "Under Review"]:  
+                            assigneeReport[assignee_data]['completedTicket']+=1
+                            assigneeReport[assignee_data]['CompletedEstimatedEffort']+= ( item.get('estimate') or 0 )
+                            assigneeReport[assignee_data]['CompletedFinalEffort']+= ( item.get('final Efforts') or 0 )
+                            if assigneeReport[assignee_data]['CompletedEstimatedEffort'] != 0:
+                                assigneeReport[assignee_data]['CompletedEstimatedFinaldrift']=round((((assigneeReport[assignee_data]['CompletedFinalEffort'] - assigneeReport[assignee_data]['CompletedEstimatedEffort'] )/(assigneeReport[assignee_data]['CompletedEstimatedEffort']  )) * 100),2)
+                            # assigneeReport[assignee_data]['CompletedEstimatedFinaldrift']+=(((item.get('final Efforts') or 0) - ( item.get('estimate') or 0 ) )/(item.get('estimate'))) * 100
+                        else:
+                            assigneeReport[assignee_data]['IncompleteTickets']+=1
+                            assigneeReport[assignee_data]['IncompleteEstimatedEffort']+= ( item.get('estimate') or 0 )
+                if item.get('assignees') != None and item.get('status') in ["Done", "Under Review"]:      
                     final_data.get(item.get('status')).get(item.get('title').split()[0]).update({item.get('content').get('number'): task_data })
                     final_effort[item.get('status')][item.get('title').split()[0]]["Estimate"]=final_effort.get(item.get('status')).get(item.get('title').split()[0]).get('Estimate')+item.get('estimate')
-                    final_effort[item.get('status')][item.get('title').split()[0]]["FinalEffort"]=final_effort.get(item.get('status')).get(item.get('title').split()[0]).get('FinalEffort')+( item.get('final Efforts') or 0 )
+                    final_effort[item.get('status')][item.get('title').split()[0]]["FinalEffort"]=final_effort.get(item.get('status')).get(item.get('title').split()[0]).get('FinalEffort')+( item.get('final Efforts') or 0  )
+
+
+            
+                
                
 # Send the mail to the assignee
 def send_email(body):
@@ -285,7 +315,7 @@ def main():
                 border-collapse: collapse;
             }
             th, td {
-                border: 1px solid #dddddd;
+                border: 2px solid  #A9A9A9;
                 text-align: left;
                 padding: 8px;
             }
@@ -327,23 +357,51 @@ def main():
                     </tr>
                     <tr style="height: 50px">
                         <td colspan="5">  </td>
-                      
                     </tr>                    
                     {% endfor %}
-
                 </tbody>
             </table>
         {% endfor %}
+
+        <h1 style="text-align: center;"><u> Sprint Report by Individual Assignee </u></h1>
+
+        <table>
+            <tbody>
+                <tr>
+                    <th style="text-align: center;">Assignee</th>
+                    <th style="text-align: center;">Incomplete Estimated Effort</th>
+                    <th style="text-align: center;">Incomplete Tickets</th>
+                    <th style="text-align: center;">Completed Estimated Effort</th>
+                    <th style="text-align: center;">Completed Final Effort</th>
+                    <th style="text-align: center;">Completed Estimated Final drift</th>
+                    <th style="text-align: center;">Completed Ticket</th>
+                </tr>
+                {% for member_name, member_progress in assigneeReport.items() %}
+                    <tr>
+                        <td style="text-align: center;">{{ member_name }}</td>
+                        <td style="text-align: center; background-color: #FFCCCC;"><b>{{ member_progress['IncompleteEstimatedEffort'] }}</b></td>
+                        <td style="text-align: center; background-color: #FFCCCC;"> <b>{{ member_progress['IncompleteTickets'] }}</b> </td>
+                        <td style="text-align: center;">{{ member_progress['CompletedEstimatedEffort'] }}</td>
+                        <td style="text-align: center;">{{ member_progress['CompletedFinalEffort'] }}</td>
+                        <td style="text-align: center;">{{ member_progress['CompletedEstimatedFinaldrift'] }} % </td>
+                        <td style="text-align: center; ">{{ member_progress['completedTicket'] }}</td>                        
+                    <tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+     
     </body>
     </html>
     """
 
     # Render HTML template with data
     template = Template(html_template)
-    body_html = template.render(data=final_data,duration=final_effort)
+    body_html = template.render(data=final_data,duration=final_effort,assigneeReport=assigneeReport)
 
     #call the send mail function
     send_email(body_html)
+    print(assigneeReport)
 
 if __name__ == "__main__":
     main()
