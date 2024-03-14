@@ -10,6 +10,13 @@ from jinja2 import Template
 
 load_dotenv()
 
+#Get the current date and time
+current_date_time = datetime.now()
+
+# Get the current date
+Today_date = current_date_time.date()
+LastDaySprintCronExecuteDate = current_date_time.date()
+
 RECIEVER = os.getenv("MAIL")
 SENDER = os.getenv("SENDER")
 
@@ -119,7 +126,7 @@ def run_gh_command(owner, project_item_list, limit):
         return None
 
 #Fetch current iteration id,title,dt_name
-def get_current_iteration_id():
+def get_current_iteration_id(LastDaySprintCronExecuteDate):
     query = f'''
     query {{
       node(id:"{PROJECT_NODE_ID}") {{
@@ -165,16 +172,17 @@ def get_current_iteration_id():
         for iteration in iterations:
             if 'configuration' in iteration and 'iterations' in iteration['configuration']:
                 for current_iteration in iteration['configuration']['iterations']:
+
                     start_date = datetime.strptime(current_iteration['startDate'], "%Y-%m-%d")
-                    
                     # Calculate the end date (2 weeks after the start date)
                     end_date = start_date + timedelta(weeks=2)
-
+                    LastDaySprintCronExecuteDate=(start_date+timedelta(days=13)).date()
                     # Check if the current date is within the iteration
                     if start_date <= current_date <= end_date:
                         current_iteration_value.append(iteration_year_name)
                         current_iteration_value.append(current_iteration['title'])
                         current_iteration_value.append(current_iteration['id'])
+                        current_iteration_value.append(LastDaySprintCronExecuteDate)
 
                         return current_iteration_value
                         
@@ -277,6 +285,8 @@ def send_email(body):
 
 
 def main():
+
+
     global PROJECT_NODE_ID, TOKEN
 
     #load the project node id and github token from the .env file
@@ -290,12 +300,15 @@ def main():
     #limit to fetch the data by gh command
     limit = os.getenv("LIMIT")
 
+    current_iterationID_title = get_current_iteration_id(LastDaySprintCronExecuteDate)
+    if current_iterationID_title[3]!=Today_date:
+        return
+
     subprocess.run(['gh', 'auth', 'login', '--with-token'], input=TOKEN, text=True, capture_output=True)
 
     project_data = run_gh_command(owner_name, item_list_number, limit)
 
     if project_data:
-        current_iterationID_title = get_current_iteration_id()
         if current_iterationID_title:
             create_iteration_data(project_data, current_iterationID_title)
         else:
