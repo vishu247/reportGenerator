@@ -202,7 +202,6 @@ def create_iteration_data(project_data, current_iterationID_title):
 
                 if item.get('assignees'):
                     assignee_key = item.get('assignees')
-                    print(assignee_key)
                     for assignee_data in assignee_key:
                         if assignee_data not in assigneeReport:
                             assigneeReport[assignee_data] = {
@@ -401,7 +400,7 @@ def main():
 
     #call the send mail function
     send_email(body_html)
-    print(assigneeReport)
+ 
 
 if __name__ == "__main__":
     main()
