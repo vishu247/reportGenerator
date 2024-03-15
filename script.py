@@ -159,10 +159,12 @@ def get_current_iteration_id(LastDaySprintCronExecuteDate):
     payload = {'query': query}
     current_iteration_value = []
     try:
-     
+        print("now trying to hit the graphql api")
         response = requests.post('https://api.github.com/graphql', headers=headers, json=payload)
+        print("successfully get the response")
         response.raise_for_status()  # Raise an exception for HTTP errors
         data = response.json()
+        print("Successfully get the data")
 
         iterations = data['data']['node']['fields']['nodes']
         iteration_year_name = data.get('data', {}).get('node', {}).get('fields', {}).get('nodes', [{}])[8].get('name')        
