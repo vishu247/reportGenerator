@@ -302,7 +302,8 @@ def main():
 
     current_iterationID_title = get_current_iteration_id(LastDaySprintCronExecuteDate)
     if current_iterationID_title[3]!=Today_date:
-        return
+        print("not today")
+        # return
 
     subprocess.run(['gh', 'auth', 'login', '--with-token'], input=TOKEN, text=True, capture_output=True)
 
