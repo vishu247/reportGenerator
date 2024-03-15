@@ -10,6 +10,7 @@ from jinja2 import Template
 
 load_dotenv()
 
+
 #Get the current date and time
 current_date_time = datetime.now()
 
@@ -287,6 +288,19 @@ def send_email(body):
 
 
 def main():
+    print(os.getenv("GIT_HUB_TOKEN"))
+    print(os.getenv("AWS_SECRET_ACCESS_KEY"))
+    print(os.getenv("LIMIT"))
+    print(os.getenv("PROJECT"))
+    print(os.getenv("REPO"))
+    print(os.getenv("SENDER"))
+    print(os.getenv("AWS"))
+    print(os.getenv("MAIL"))
+    print(os.getenv("AWS_REGION"))
+    print(os.getenv("AWS_ACCESS_KEY_ID"))
+    print(os.getenv("PROJECT_NODE_ID"))
+    
+    
 
 
     global PROJECT_NODE_ID, TOKEN
