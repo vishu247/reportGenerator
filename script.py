@@ -152,6 +152,7 @@ def get_current_iteration_id(LastDaySprintCronExecuteDate):
     }}
     '''
 
+    print(TOKEN)
     headers = {
         'Authorization': f'Bearer {TOKEN}',
         'Content-Type': 'application/json',
@@ -161,6 +162,8 @@ def get_current_iteration_id(LastDaySprintCronExecuteDate):
     current_iteration_value = []
     try:
         print("now trying to hit the graphql api")
+        print(headers)
+        print(json)
         response = requests.post('https://api.github.com/graphql', headers=headers, json=payload)
         print("successfully get the response")
         response.raise_for_status()  # Raise an exception for HTTP errors
@@ -316,6 +319,7 @@ def main():
     #limit to fetch the data by gh command
     limit = os.getenv("LIMIT")
 
+    print(LastDaySprintCronExecuteDate)
     current_iterationID_title = get_current_iteration_id(LastDaySprintCronExecuteDate)
     if current_iterationID_title[3]!=Today_date:
         print("not today")
