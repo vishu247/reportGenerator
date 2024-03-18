@@ -291,21 +291,6 @@ def send_email(body):
 
 
 def main():
-    print(os.getenv("GIT_HUB_TOKEN"))
-    print(os.getenv("AWS_SECRET_ACCESS_KEY"))
-    print(os.getenv("LIMIT"))
-    print(os.getenv("PROJECT"))
-    print(os.getenv("REPO"))
-    print(os.getenv("SENDER"))
-    print(os.getenv("AWS"))
-    print(os.getenv("MAIL"))
-    print(os.getenv("AWS_REGION"))
-    print(os.getenv("AWS_ACCESS_KEY_ID"))
-    print(os.getenv("PROJECT_NODE_ID"))
-    
-    
-
-
     global PROJECT_NODE_ID, TOKEN
 
     #load the project node id and github token from the .env file
@@ -322,8 +307,8 @@ def main():
     print(LastDaySprintCronExecuteDate)
     current_iterationID_title = get_current_iteration_id(LastDaySprintCronExecuteDate)
     if current_iterationID_title[3]!=Today_date:
-        print("not today")
-        # return
+        print("Today is not the day of the sprint end")
+        return
 
     subprocess.run(['gh', 'auth', 'login', '--with-token'], input=TOKEN, text=True, capture_output=True)
 
