@@ -180,6 +180,8 @@ def get_current_iteration_id(LastDaySprintCronExecuteDate):
                 for current_iteration in iteration['configuration']['iterations']:
 
                     start_date = datetime.strptime(current_iteration['startDate'], "%Y-%m-%d")
+                    print(start_date+"   THIS is the start date")
+                    start_date = os.getenv("SPRINT_START_DATE")
                     # Calculate the end date (2 weeks after the start date)
                     end_date = start_date + timedelta(weeks=2)
                     LastDaySprintCronExecuteDate=(start_date+timedelta(days=13)).date()
